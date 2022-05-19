@@ -1,0 +1,10 @@
+[Unit]
+Description=Cluster data import from mydx.eu
+After=network.target postgresql@13-main.service 
+
+[Service]
+ExecStart=/usr/local/cluster-collect-dev/collect_mydx.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

@@ -19,6 +19,8 @@ MC = MongoClient(CONF['db']['host'],
 SRC_ID = sys.argv[1]
 DB = MC.dx
 
+DXCC_RU = set(['54', '126', '15'])
+
 SRC_CONF = CONF[f"src:{SRC_ID}"]
 IS_SKIMMER = SRC_CONF.getboolean('skimmer')
 rsp = requests.get(SRC_CONF['url'])
@@ -35,6 +37,10 @@ for dx in data:
         break
 if dx_data.data:
     for item in dx_data.data:
+        if item['dxcc'] in DXCC_RU:
+            rda_data = DB.dx.find_one({'cs': item['cs'], 'rda': {'$nin': [None, '?']}})
+            if rda_data:
+                item['rda'] = rda_data['rda']
         DB.dx.delete_many({
             'ts': {'$gt': item['ts'] - 5400}, 
             'cs': item['cs'], 

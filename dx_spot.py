@@ -4,8 +4,6 @@ import os
 import re
 import time
 from datetime import datetime
-#coding=utf-8
-from ham_radio import BANDS_WL
 
 APP_PATH = os.path.dirname(os.path.realpath(__file__))
 MODES_MAP = []
@@ -15,6 +13,11 @@ with open(APP_PATH + '/bandMap.txt', 'r' ) as f_band_map:
         m = re_band_map.match(line)
         if m:
             MODES_MAP.append([m.group(3), float(m.group(1)), float(m.group(2))])
+
+BANDS_WL = {'160M': '1.8', '80M': '3.5', '40M': '7', \
+        '30M': '10', '20M': '14', '14M': '20', '17M': '18', '15M': '21', \
+        '12M': '24', '10M': '28', '6M': '50', '2M': '144', \
+        '33CM': 'UHF', '23CM':'UHF', '13CM': 'UHF'}
 
 BANDS = [
             ['1.8', 1800, 2000],
@@ -30,17 +33,20 @@ BANDS = [
             ['144', 144000, 148000],
             ['UHF', 150000, 2000000]
         ]
-MODES = {
-            'CW': ('CW', 'A1A'),
-            'SSB': ('USB', 'LSB', 'FM', 'SSB', 'AM', 'PHONE'),
-            'DIGI': ('DIGI', 'HELL', 'MT63', 'THOR16', 'FAX', 'OPERA', 'PKT',
-                'SIM31', 'CONTESTI', 'CONTESTIA', 'AMTOR', 'JT6M', 'ASCI',
-                'FT8', 'MSK144', 'THOR', 'QRA64','DOMINO', 'JT4C', 'THROB',
-                'DIG', 'ROS', 'SIM63', 'FSQ', 'THRB', 'J3E', 'WSPR', 'ISCAT',
-                'CONTESTIA8', 'ALE', 'JT10', 'TOR', 'PACKET', 'RTTY',
-                'PSK', 'JT65', 'FSK', 'OLIVIA', 'SSTV',
-                'JT9', 'FT8')
-        }
+MODES = {'DIGI': ('DATA', 'HELL', 'MT63', 'THOR16', 'FAX', 'OPERA', 'PKT', 'RY',\
+                    'SIM31', 'CONTESTI', 'CONTESTIA', 'AMTOR', 'JT6M', 'ASCI',\
+                    'FT8', 'MSK144', 'THOR', 'QRA64', 'DOMINO', 'JT4C', 'THROB',\
+                    'DIG', 'ROS', 'SIM63', 'FSQ', 'THRB', 'J3E', 'WSPR', 'ISCAT',\
+                    'JT65A', 'CONTESTIA8', 'ALE', 'JT10', 'TOR', 'PACKET', 'RTTY',\
+                    'FSK63', 'MFSK63', 'QPSK63', 'PSK', 'JT65', 'FSK', 'OLIVIA',\
+                    'CONTEST', 'SSTV', 'PSK31', 'PSK63', 'PSK125', 'JT9', 'FT8', \
+                    'MFSK16', 'MFSK', 'ARDOP', 'ATV', 'C4FM', 'CHIP', 'CLO',\
+                    'DIGITALVOICE', 'DOMINO', 'DSTAR', 'ISCAT', 'Q15', 'QPSK31',\
+                    'QRA64', 'T10', 'THRB', 'VOI', 'WINMOR', 'WSPR', 'FT4', 'FT-8',\
+                    'FT-4', 'QPSK125', 'BPSK63', 'BPSK125', 'BPSK'),\
+         'CW': ('A1A'),\
+         'SSB': ('USB', 'LSB', 'FM', 'AM', 'PHONE')}
+
 SUB_MODES = {'RTTY': None, 'JT65': None, 'PSK': ('PSK31', 'PSK63', 'PSK125')}
 
 def find_diap(diaps, value):
@@ -69,6 +75,9 @@ class DX:
         self.eqsl = params.get('eqsl')
         self.time = params.get('time')
         self.dxcc = params.get('dxcc')
+        self.rda = params.get('rda')
+        if len(self.time) == 5:
+            self.time = datetime.utcnow().date().strftime("%Y-%m-%d") + f" {self.time}:00"
         self.ts = time.mktime(datetime.strptime(self.time, "%Y-%m-%d %H:%M:%S").timetuple())
 
         txt = self.text.lower()
@@ -161,12 +170,10 @@ class DX:
             'dt': self.time,
             'ts': self.ts,
             'time': self.time[11:16],
-            'country' : self.country,
             'mode': self.mode,
             'subMode': self.sub_mode,
             'band': self.band,
-            'lotw': self.lotw,
-            'eqsl': self.eqsl
+            'rda': self.rda
             }
 
 class DXData:
