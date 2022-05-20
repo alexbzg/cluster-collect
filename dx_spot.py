@@ -78,6 +78,8 @@ class DX:
         self.rda = params.get('rda')
         if len(self.time) == 5:
             self.time = datetime.utcnow().date().strftime("%Y-%m-%d") + f" {self.time}:00"
+            if self.time > time.time():
+                self.time -= 86400
         self.ts = time.mktime(datetime.strptime(self.time, "%Y-%m-%d %H:%M:%S").timetuple())
 
         txt = self.text.lower()

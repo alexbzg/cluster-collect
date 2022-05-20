@@ -26,7 +26,22 @@ async def ws_client():
             async for message in ws:
                 if message[0] == 'S':
                     _, time, freq, mode, cs, rda, _, _, _, autocfm = message.split(';')
-                    item = DX(cs=cs, freq=freq, mode=mode, de='mydx.eu', time=time, rda=rda).to_dict()
+                    item = DX(cs=cs, freq=freq, mode=mode, de='mydx.eu', time=time, 
+                            rda=rda).to_dict()
+                    txt_data = DB.dx.find_one({
+                        'ts': {'$gt': item['ts'] - 5400},
+                        'cs': item['cs'],
+                        'freq': {
+                            '$gt': item['freq'] - 1,
+                            '$lt': item['freq'] + 1
+                            },
+                        'text': {
+                            '$ne': ''
+                            }
+                        })
+                    if txt_data:
+                        item['text'] = txt_data['text']
+
                     DB.dx.delete_many({
                         'ts': {'$gt': item['ts'] - 5400},
                         'cs': item['cs'],
