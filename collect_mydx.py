@@ -41,6 +41,7 @@ async def ws_client():
                         })
                     if txt_data:
                         item['text'] = txt_data['text']
+                        item['de'] = txt_dta['de']
 
                     DB.dx.delete_many({
                         'ts': {'$gt': item['ts'] - 5400},
